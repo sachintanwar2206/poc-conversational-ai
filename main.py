@@ -13,6 +13,6 @@ supabase: Client = create_client(url, key)
 
 # Fetch user
 @app.get("/user")
-def get_user(last4ssn: str, dob: date, zip_code: int):
-    user = supabase.from_("users").select("*").eq("last4ssn", last4ssn).eq("dob", dob).eq("zip_code", zip_code).execute()
+def get_user(last4ssn: int, dob: date, zip_code: int):
+    user = supabase.from_("users").select("*, user_payments(*), user_coverages(*)").eq("last4ssn", last4ssn).eq("dob", dob).eq("zip_code", zip_code).execute()
     return user.data
