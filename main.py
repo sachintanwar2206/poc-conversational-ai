@@ -2,9 +2,20 @@ import os
 from datetime import date
 from supabase import create_client, Client
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
@@ -30,7 +41,7 @@ class UserRequest(BaseModel):
     last4ssn: int
     dob: date
     zip_code: int
-    
+
 # POST API to fetch user
 @app.post("/user")
 def post_user(user_request: UserRequest):
