@@ -2,6 +2,7 @@ import os
 from datetime import date
 from supabase import create_client, Client
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -20,6 +21,25 @@ def get_user(last4ssn: int, dob: date, zip_code: int):
         .eq("last4ssn", last4ssn)
         .eq("dob", dob)
         .eq("zip_code", zip_code)
+        .execute()
+    )
+    return user.data
+
+# Define a request model for the POST API
+class UserRequest(BaseModel):
+    last4ssn: int
+    dob: date
+    zip_code: int
+    
+# POST API to fetch user
+@app.post("/user")
+def post_user(user_request: UserRequest):
+    user = (
+        supabase.from_("users")
+        .select("name, user_recent_payments(amount, received_date, method, coverage_month), user_pending_payments(amount, due_date, coverage_month), user_coverages(monthly_premium, user_coverage_plans(plan_name, coverage))")
+        .eq("last4ssn", user_request.last4ssn)
+        .eq("dob", user_request.dob)
+        .eq("zip_code", user_request.zip_code)
         .execute()
     )
     return user.data
