@@ -49,11 +49,11 @@ class UserResponse(BaseModel):
 
 # POST API to fetch user
 @app.post("/user")
-async def post_user(user_request: Request):
-    req = await user_request.json()
-    print(req)
-    return ""
-    user_request = UserRequest(request.message.toolCallList[0].arguments)
+async def post_user(req: Request):
+    req_json = await req.json()
+    tool_call = req_json["message"]["toolCalls"][0]
+    payload = tool_call["function"]["arguments"]
+    user_request = UserRequest(last4ssn=payload["last4ssn"], dob=payload["dob"], zip_code=payload["zip_code"])
     user = (
         supabase.from_("users")
         .select("name, user_recent_payments(amount, received_date, method, coverage_month), user_pending_payments(amount, due_date, coverage_month), user_coverages(monthly_premium, user_coverage_plans(plan_name, coverage))")
@@ -62,4 +62,4 @@ async def post_user(user_request: Request):
         .eq("zip_code", user_request.zip_code)
         .execute()
     )
-    return UserResponse(toolCallId=request.message.call.id, result=user.data[0])
+    return UserResponse(toolCallId=str(tool_call["id"]), result=user.data[0])
