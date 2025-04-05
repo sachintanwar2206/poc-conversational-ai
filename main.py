@@ -41,6 +41,11 @@ class UserRequest(BaseModel):
     last4ssn: int
     dob: date
     zip_code: int
+    
+# Define a response model for the POST API
+class UserResponse(BaseModel):
+    toolCallId: str
+    result: object
 
 # POST API to fetch user
 @app.post("/user")
@@ -53,4 +58,4 @@ def post_user(user_request: UserRequest):
         .eq("zip_code", user_request.zip_code)
         .execute()
     )
-    return user.data
+    return UserResponse(toolCallId="X", result=user.data[0])
