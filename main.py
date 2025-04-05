@@ -1,7 +1,7 @@
 import os
 from datetime import date
 from supabase import create_client, Client
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -49,7 +49,11 @@ class UserResponse(BaseModel):
 
 # POST API to fetch user
 @app.post("/user")
-def post_user(user_request: UserRequest):
+async def post_user(user_request: Request):
+    req = await user_request.json()
+    print(req)
+    return ""
+    user_request = UserRequest(request.message.toolCallList[0].arguments)
     user = (
         supabase.from_("users")
         .select("name, user_recent_payments(amount, received_date, method, coverage_month), user_pending_payments(amount, due_date, coverage_month), user_coverages(monthly_premium, user_coverage_plans(plan_name, coverage))")
@@ -58,4 +62,4 @@ def post_user(user_request: UserRequest):
         .eq("zip_code", user_request.zip_code)
         .execute()
     )
-    return UserResponse(toolCallId="X", result=user.data[0])
+    return UserResponse(toolCallId=request.message.call.id, result=user.data[0])
