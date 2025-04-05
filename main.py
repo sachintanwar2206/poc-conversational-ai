@@ -44,8 +44,7 @@ class UserRequest(BaseModel):
     
 # Define a response model for the POST API
 class UserResponse(BaseModel):
-    toolCallId: str
-    result: object
+    results: object
 
 # POST API to fetch user
 @app.post("/user")
@@ -62,4 +61,4 @@ async def post_user(req: Request):
         .eq("zip_code", user_request.zip_code)
         .execute()
     )
-    return UserResponse(toolCallId=str(tool_call["id"]), result=user.data[0])
+    return UserResponse(results=[{"toolCallId":str(tool_call["id"]), "result":user.data[0]}])
